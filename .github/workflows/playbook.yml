@@ -1,0 +1,49 @@
+---
+name: playbook
+on: [deployment, push]
+
+jobs:
+  playbook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Ansible 2.9.9
+        run: |
+          pip uninstall ansible
+          pip install ansible==2.9.9
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build CentOS7 image sudo installed
+        run: docker build tests/. -t centos7
+
+      - name: Docker run CentOS7 image sudo installed
+        run: docker run -d -t --name=centos7 centos7
+
+      - name: Install Ansible galaxy roles
+        run: |
+          ansible-galaxy install -r tests/roles/requirements.yml -p tests/roles
+
+      - name: Execute ansible-playbook command
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
+        run: |
+          ansible-playbook -i 'centos7,' -c docker -u ansible tests/test.yml
+
+      - name: Check idempotency
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
+        run: |
+          ansible-playbook -i 'centos7,' -c docker -u ansible tests/test.yml
+
+      - name: Check whether cowsay works
+        run: |
+          docker exec --tty centos7 env TERM=xterm cowsay hello!
+
+      - name: Show Ansible version
+        run: |
+          ansible --version
+
+      - name: Show OS information
+        run: |
+          docker exec --tty centos7 env TERM=xterm cat /etc/redhat-release

@@ -1,0 +1,4 @@
+---
+- geerlingguy.repo-epel
+- src: https://github.com/TomonoriMatsumura/ansible-night-2020-06.git
+  name: cowsay
