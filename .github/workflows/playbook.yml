@@ -5,11 +5,26 @@ on: [deployment, push]
 jobs:
   playbook:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 2.7
+          - 3.6
+          - 3.7
+          - 3.8
     steps:
-      - name: Install Ansible 2.9.9
+      - name: Show Ansible version
         run: |
-          pip uninstall ansible
-          pip install ansible==2.9.9
+          ansible --version
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Ansible 2.9.10
+        run: |
+          pip install ansible==2.9.10
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -36,7 +51,7 @@ jobs:
         run: |
           ansible-playbook -i 'centos7,' -c docker -u ansible tests/test.yml
 
-      - name: Check whether cowsay works
+      - name: Make sure the cowsay command works
         run: |
           docker exec --tty centos7 env TERM=xterm cowsay hello!
 
