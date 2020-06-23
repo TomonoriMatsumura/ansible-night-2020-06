@@ -12,6 +12,9 @@ jobs:
           - 3.6
           - 3.7
           - 3.8
+        ansible-version:
+          - 'ansible==2.9.10'
+          - 'ansible-base'
     steps:
       - name: Show Ansible version
         run: |
@@ -22,9 +25,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Ansible 2.9.10
+      - name: Show uptime
         run: |
-          pip install ansible==2.9.10
+          uptime
+
+      - name: Show IPv4 address
+        run: |
+          hostname -I
+
+      - name: Install Ansible
+        run: |
+          pip install ${{ matrix.ansible-version }}
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,19 +48,22 @@ jobs:
 
       - name: Install Ansible galaxy roles
         run: |
-          ansible-galaxy install -r tests/roles/requirements.yml -p tests/roles
+          ansible-galaxy install \
+          -r tests/roles/requirements.yml
 
       - name: Execute ansible-playbook command
         env:
           ANSIBLE_FORCE_COLOR: '1'
         run: |
-          ansible-playbook -i 'centos7,' -c docker -u ansible tests/test.yml
+          ansible-playbook -i 'centos7,' \
+          -c docker -u ansible tests/test.yml
 
       - name: Check idempotency
         env:
           ANSIBLE_FORCE_COLOR: '1'
         run: |
-          ansible-playbook -i 'centos7,' -c docker -u ansible tests/test.yml
+          ansible-playbook -i 'centos7,' \
+          -c docker -u ansible tests/test.yml
 
       - name: Make sure the cowsay command works
         run: |

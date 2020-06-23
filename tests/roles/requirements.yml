@@ -1,4 +1,8 @@
 ---
-- geerlingguy.repo-epel
-- src: https://github.com/TomonoriMatsumura/ansible-night-2020-06.git
-  name: cowsay
+roles:
+- name: geerlingguy.repo-epel
+- name: cowsay
+  src: https://github.com/TomonoriMatsumura/ansible-night-2020-06.git
+
+collections:
+- name: community.general
